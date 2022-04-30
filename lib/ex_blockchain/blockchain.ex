@@ -15,6 +15,30 @@ defmodule ExBlockchain.Blockchain do
     }
   end
 
+  @spec get_latest_block(Blockchain.t()) :: Block.t()
+  defp get_latest_block(blockchain) do
+    List.last(blockchain.chain)
+  end
+
+  @spec add_new_block(Blockchain.t()) :: Blockchain.t()
+  def add_new_block(blockchain) do
+    latest_block = get_latest_block(blockchain)
+    new_block = Block.generate(latest_block.hash, get_timestamp())
+
+    %Blockchain{blockchain | chain: blockchain.chain ++ [new_block]}
+  end
+
+  @spec is_chain_valid?(List.t()) :: Boolean.t()
+  def is_chain_valid?([previous_block, current_block | rest]) do
+    if previous_block.hash == current_block.previous_hash do
+      is_chain_valid?([current_block | rest])
+    else
+      false
+    end
+  end
+
+  def is_chain_valid?(_), do: true
+
   @spec generate_genesis_block() :: Block.t()
   defp generate_genesis_block do
     Block.generate(genesis_block_previous_hash(), get_timestamp())
