@@ -28,8 +28,12 @@ defmodule ExBlockchain.Blockchain do
     %Blockchain{blockchain | chain: blockchain.chain ++ [new_block]}
   end
 
+  def is_blockchain_valid?(blockchain) do
+    is_chain_valid?(blockchain.chain)
+  end
+
   @spec is_chain_valid?(List.t()) :: Boolean.t()
-  def is_chain_valid?([previous_block, current_block | rest]) do
+  defp is_chain_valid?([previous_block, current_block | rest]) do
     if previous_block.hash == current_block.previous_hash do
       is_chain_valid?([current_block | rest])
     else
@@ -37,7 +41,7 @@ defmodule ExBlockchain.Blockchain do
     end
   end
 
-  def is_chain_valid?(_), do: true
+  defp is_chain_valid?(_), do: true
 
   @spec generate_genesis_block() :: Block.t()
   defp generate_genesis_block do

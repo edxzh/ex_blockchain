@@ -1,6 +1,6 @@
 defmodule ExBlockchain.BlockchainTest do
   use ExUnit.Case, async: true
-  alias ExBlockchain.Blockchain
+  alias ExBlockchain.{Blockchain, Block}
 
   test "generate" do
     blockchain = Blockchain.generate()
@@ -8,12 +8,26 @@ defmodule ExBlockchain.BlockchainTest do
     assert length(blockchain.chain) == 1
   end
 
-  test "is_chain_valid?" do
-    blockchain = Blockchain.generate()
-    blockchain = Blockchain.add_new_block(blockchain)
-    blockchain = Blockchain.add_new_block(blockchain)
-    blockchain = Blockchain.add_new_block(blockchain)
+  describe "is_chain_valid?" do
+    setup do
+      blockchain = Blockchain.generate()
+      blockchain = Blockchain.add_new_block(blockchain)
+      blockchain = Blockchain.add_new_block(blockchain)
+      blockchain = Blockchain.add_new_block(blockchain)
 
-    assert Blockchain.is_chain_valid?(blockchain.chain)
+      {:ok, blockchain: blockchain}
+    end
+
+    test "valid chain", %{blockchain: blockchain} do
+      assert Blockchain.is_blockchain_valid?(blockchain)
+    end
+
+    test "invalid chain", %{blockchain: blockchain} do
+      random_block = Block.generate("not_exists_hash", "timestamp")
+
+      invalid_blokchain = %Blockchain{chain: blockchain.chain ++ [random_block]}
+
+      refute Blockchain.is_blockchain_valid?(invalid_blokchain)
+    end
   end
 end
