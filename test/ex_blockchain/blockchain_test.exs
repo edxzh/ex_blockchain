@@ -23,7 +23,7 @@ defmodule ExBlockchain.BlockchainTest do
     end
 
     test "invalid chain", %{blockchain: blockchain} do
-      random_block = Block.generate("not_exists_hash", "timestamp")
+      random_block = Block.generate("not_exists_hash", "timestamp", nil)
 
       invalid_blokchain = %Blockchain{chain: blockchain.chain ++ [random_block]}
 

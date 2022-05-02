@@ -1,7 +1,7 @@
 defmodule ExBlockchain.Blockchain do
   @moduledoc false
-  @enforced_keys [:chain]
-  defstruct [:chain]
+  @enforced_keys [:chain, :difficulty]
+  defstruct [:chain, difficulty: 2]
   alias ExBlockchain.{Block, Blockchain}
 
   @type t() :: %__MODULE__{
@@ -11,7 +11,8 @@ defmodule ExBlockchain.Blockchain do
   @spec generate() :: Blockchain.t()
   def generate do
     %__MODULE__{
-      chain: [generate_genesis_block()]
+      chain: [generate_genesis_block()],
+      difficulty: 2
     }
   end
 
@@ -23,7 +24,7 @@ defmodule ExBlockchain.Blockchain do
   @spec add_new_block(Blockchain.t()) :: Blockchain.t()
   def add_new_block(blockchain) do
     latest_block = get_latest_block(blockchain)
-    new_block = Block.generate(latest_block.hash, get_timestamp())
+    new_block = Block.generate(latest_block.hash, get_timestamp(), "data", blockchain.difficulty)
 
     %Blockchain{blockchain | chain: blockchain.chain ++ [new_block]}
   end
@@ -45,7 +46,7 @@ defmodule ExBlockchain.Blockchain do
 
   @spec generate_genesis_block() :: Block.t()
   defp generate_genesis_block do
-    Block.generate(genesis_block_previous_hash(), get_timestamp())
+    Block.generate(genesis_block_previous_hash(), get_timestamp(), "data")
   end
 
   @spec genesis_block_previous_hash() :: String.t()

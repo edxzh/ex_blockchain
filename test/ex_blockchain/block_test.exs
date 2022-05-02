@@ -4,10 +4,10 @@ defmodule ExBlockchain.BlockTest do
   alias ExBlockchain.Block
 
   test "generate" do
-    block = Block.generate("previous_hash", "timestamp")
+    block = Block.generate("previous_hash", "timestamp", "data", 1)
 
     assert block.previous_hash == "previous_hash"
     assert block.timestamp == "timestamp"
-    assert block.hash == "54fb1baa2de718ddf203b3e684ff44b850c02797606b90f4c311bfd7c98a47ab"
+    assert block.hash == "047120f7ec3faedb4a56fe95f59e3876a352c43913823056c2fe085705af0d24"
   end
 end
