@@ -73,6 +73,20 @@ defmodule ExBlockchain.Blockchain do
   @spec genesis_block_previous_hash() :: String.t()
   defp genesis_block_previous_hash, do: String.duplicate("0", 64)
 
+  @spec balance_of_address(Blockchain.t(), String.t()) :: number()
+  def balance_of_address(blockchain, address) do
+    for block <- blockchain.chain, transaction <- block.transactions do
+      {from_address, to_address} = {transaction.from_address, transaction.to_address}
+
+      case address do
+        ^from_address -> 0 - transaction.amount
+        ^to_address -> 0 + transaction.amount
+        _ -> 0
+      end
+    end
+    |> Enum.sum()
+  end
+
   @spec get_timestamp() :: String.t()
   defp get_timestamp do
     :second

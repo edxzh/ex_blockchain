@@ -32,4 +32,14 @@ defmodule ExBlockchain.BlockchainTest do
       refute Blockchain.is_blockchain_valid?(invalid_blokchain)
     end
   end
+
+  describe "balance of" do
+    test "positive balance", %{blockchain: blockchain} do
+      assert Blockchain.balance_of_address(blockchain, "fake address") == 100
+      assert Blockchain.balance_of_address(blockchain, "fake address2") == 0
+
+      assert Enum.at(blockchain.pending_transactions, 0).to_address == "fake address"
+      assert Enum.at(blockchain.pending_transactions, 0).amount == blockchain.mining_reward
+    end
+  end
 end
