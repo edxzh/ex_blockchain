@@ -1,8 +1,8 @@
 defmodule ExBlockchain.Blockchain do
   @moduledoc false
-  @enforced_keys [:chain, :difficulty]
-  defstruct [:chain, difficulty: 2]
-  alias ExBlockchain.{Block, Blockchain}
+  @enforced_keys [:chain, :difficulty, :pending_transactions, :mining_reward]
+  defstruct chain: [], pending_transactions: [], difficulty: 2, mining_reward: 50
+  alias ExBlockchain.{Block, Blockchain, Transaction}
 
   @type t() :: %__MODULE__{
           chain: [Block.t()]
@@ -12,7 +12,9 @@ defmodule ExBlockchain.Blockchain do
   def generate do
     %__MODULE__{
       chain: [generate_genesis_block()],
-      difficulty: 2
+      difficulty: 2,
+      pending_transactions: [],
+      mining_reward: 50
     }
   end
 
@@ -21,14 +23,33 @@ defmodule ExBlockchain.Blockchain do
     List.last(blockchain.chain)
   end
 
-  @spec add_new_block(Blockchain.t()) :: Blockchain.t()
-  def add_new_block(blockchain) do
+  @spec mine_block(Blockchain.t(), String.t()) :: Blockchain.t()
+  def mine_block(blockchain, reward_address) do
     latest_block = get_latest_block(blockchain)
-    new_block = Block.generate(latest_block.hash, get_timestamp(), "data", blockchain.difficulty)
 
-    %Blockchain{blockchain | chain: blockchain.chain ++ [new_block]}
+    new_block =
+      Block.mine(
+        latest_block.hash,
+        get_timestamp(),
+        blockchain.pending_transactions,
+        blockchain.difficulty
+      )
+
+    transaction_of_reward = %Transaction{
+      from_address: nil,
+      to_address: reward_address,
+      amount: blockchain.mining_reward,
+      timestamp: get_timestamp()
+    }
+
+    %Blockchain{
+      blockchain
+      | chain: blockchain.chain ++ [new_block],
+        pending_transactions: [transaction_of_reward]
+    }
   end
 
+  @spec is_blockchain_valid?(Blockchain.t()) :: Boolean.t()
   def is_blockchain_valid?(blockchain) do
     is_chain_valid?(blockchain.chain)
   end
@@ -46,7 +67,7 @@ defmodule ExBlockchain.Blockchain do
 
   @spec generate_genesis_block() :: Block.t()
   defp generate_genesis_block do
-    Block.generate(genesis_block_previous_hash(), get_timestamp(), "data")
+    Block.mine(genesis_block_previous_hash(), get_timestamp(), [])
   end
 
   @spec genesis_block_previous_hash() :: String.t()
